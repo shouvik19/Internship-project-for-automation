@@ -1,0 +1,842 @@
+
+###################################################################################
+#           Programme to Generate CBA+ADDITIONAL VALIDATION REPORT                #                                                       #
+#Testing:-     Sharma, Shouvik                                                        #
+#Date of Preparation:- 11-04-2016                                                 #
+#Last Modified:- 02-07-2017                                                      #
+###################################################################################
+rm(list=ls())
+##### Function to call/Install Required Packages############
+packages<-function(x){
+  x<-as.character(match.call()[[2]])
+  if (!require(x,character.only=TRUE)){
+    install.packages(pkgs=x,repos="http://cran.r-project.org")
+    require(x,character.only=TRUE)
+  }
+}
+
+packages(rJava)
+packages(rJava)
+packages(XLConnect)
+packages(RGtk2)
+options(guiToolkit="RGtk2")
+packages(gWidgetsRGtk2)
+packages(tcltk)
+packages(reshape2)
+packages(plyr)
+packages(readr)
+
+library(rJava)
+library(rJava)
+library(XLConnect)
+library(RGtk2)
+options(guiToolkit="RGtk2")
+library(gWidgetsRGtk2)
+library(tcltk)
+library(reshape2)
+library(plyr)
+library(readr)
+
+merge.all <- function(by, ...) {
+  frames <- list(...)
+  return (Reduce(function(x, y) {merge(x, y, by = by, all = TRUE)}, frames))
+}  # end merge.all
+
+
+###################################################################
+createKsTestGwidgets <- function(){
+  w <- gwindow("R PROG TO PERFORM CBA & ADDITIONAL VALIDATION",visible=T)
+  g <- ggroup(horizontal = F, container = w)
+  ga1 <- gframe("",pos=0.5,horizontal = F, container = g)
+  bb<-glabel("PART I::Generate Outlettype file",cont=ga1,anchor=c(05,1),editable=T,markup=T)
+  gaa1 <- gframe("",pos=0.5,horizontal = T, container = g)
+  bbb<-glabel("BATCH NAME :",cont=gaa1,anchor=c(-1,0))
+  b122<-gedit("BATCH-7",cont=gaa1)
+  bbb_bbbb<-glabel("                             ",cont=gaa1,anchor=c(-1,0))
+  bbbb<-glabel("                                                                                    COUNTRY NAME :",cont=gaa1,anchor=c(1,0),editable=T)
+  b1222b<-gedit("India",cont=gaa1)
+  
+  ga <- gframe("SELECT REQUIRED INPUTS",pos=0.5,horizontal = T, container = g)
+  ga_1 <- gframe("",horizontal = T, container = g)
+  ga_2 <- gframe("",horizontal = T, container = g)
+  ga_3<-  gframe("",horizontal = T, container = g)
+  ga_5<-  gframe("",horizontal = T, container = g)
+  ga_4<-  gframe("",horizontal = T, container = g)
+  
+  gc <- gframe(horizontal = F,pos=0.5, container = g)
+  gg <- gframe(horizontal = F,pos=0.5, container = g)
+  
+  browse.file1 <- gfilebrowse("GO Codeframe.csv",container = ga,type="open",quote=F)
+  size(browse.file1)<-c(200,20)
+  b1<-glabel("GO CodeFrame - Variables : ",cont=ga,anchor=c(-1,0),editable = T)
+  b1_12<-glabel("",cont=ga,anchor=c(-1,0),editable = T)
+  size(b1_12)<-c(20,20)
+  b12<-gedit("BCODE,DONE",cont=ga)
+  size(b12)<-c(300,20)
+  
+  browse.file2 <- gfilebrowse("DC Codeframe.csv",container = ga_1,type="open",quote=F)
+  size(browse.file2)<-c(200,20)
+  b2<-glabel("DC CodeFrame - Variables : ",cont=ga_1,anchor=c(-1,0),editable=T)
+  b2_22<-glabel("",cont=ga_1,anchor=c(-1,0),editable = T)
+  size(b2_22)<-c(20,20)
+  b22<-gedit("BCODE,Selection_PY,STD_MBD,Urbanity",cont=ga_1)
+  size(b22)<-c(300,20)
+  
+  browse.file3 <- gfilebrowse("CURRENT YEAR DB.csv",container = ga_2,type="open",quote=F)
+  size(browse.file3)<-c(200,20)
+  b3<-glabel("DB Current Year - Variables : ",cont=ga_2,anchor=c(-1,0),editable = T)
+  b3_32<-glabel("",cont=ga_2,anchor=c(-1,0),editable = T)
+  size(b3_32)<-c(15,20)
+  b32<-gedit("RESPONSEID,BLOCK_CODE,OUTTYPENM,INFO_COLL1,CIG_HAND,BEV_HAND",cont=ga_2)
+  size(b32)<-c(425,20)
+  
+  browse.file4 <- gfilebrowse("PREVIOUS YEAR DB.csv",container = ga_3,type="open",quote=F)
+  size(browse.file4)<-c(200,20)
+  b4<-glabel("DB Previous Year - Variables : ",cont=ga_3,anchor=c(1,0),editable = T)
+  b4_42<-glabel("",cont=ga_3,anchor=c(-1,0),editable = T)
+  size(b4_42)<-c(11,20)
+  b42<-gedit("RESPONSEID,BLOCK_CODE,OUTTYPENM,INFO_COLL1",cont=ga_3)
+  size(b42)<-c(300,20)
+  
+  browse.file66 <- gfilebrowse("THRESHOLDS FILE.csv",container = ga_5,type="open",quote=F,editable=T)
+  size(browse.file66)<-c(200,20)
+  bf66<-glabel("",cont=ga_5,anchor=c(-1,0),editable=T)
+  size(bf66)<-c(340,20)
+  browse.file5 <- gfilebrowse("OUTPUT FOLDER PATH",container = ga_5,type="selectdir",quote=F)
+  #bf_5<-gedit("",cont=ga_5,handler = browse.file5)
+  size(browse.file5)<-c(200,20)
+  
+  b5<-glabel("CURRENT YEAR (Eg:2013): ",cont=ga_4,anchor=c(-1,0))
+  b5_52<-glabel("",cont=ga_4,anchor=c(-1,0),editable = T)
+  b52<-gedit("2013",cont=ga_4)
+  size(b52)<-c(100,20)
+  b62_52<-glabel("",cont=ga_4,anchor=c(-1,0),editable = T)
+  size(b62_52)<-c(340,20)
+  b6<-glabel("PREVIOUS YEAR (Eg:2012) : ",cont=ga_4,anchor=c(-1,0),editable=T)
+  b6_62<-glabel("",cont=ga_4,anchor=c(-1,0),editable = T)
+  b62<-gedit("2012",cont=ga_4)
+  size(b62)<-c(100,20)
+  
+  
+  button1 <- gbutton(text="OK -TO SUBMIT INPUT::PART I", container = gc,
+                     handler = function(h, ...) {
+                       Go_path<<- svalue(browse.file1)
+                       DC_path<<- svalue(browse.file2)
+                       DBCY<<- svalue(browse.file3)
+                       DBPY<<- svalue(browse.file4)
+                       outpath<<- svalue(browse.file5)
+                       Thrshold<<-svalue(browse.file66)
+                       Go_var<<-svalue(b12)
+                       DC_Codeframe_Var<<-svalue(b22)
+                       DB_CY_Var<<-svalue(b32)
+                       DB_PY_Var<<-svalue(b42)
+                       Cur_Year<<-svalue(b52)
+                       Pre_Year<<-svalue(b62)
+                       
+                     })
+  ##############################Framing for Part I Completed###############################################
+  rbc<-function(h,...){
+    
+    
+    trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+    
+    Go_var<-unlist(strsplit(Go_var,","))
+    DC_Codeframe_Var<-unlist(strsplit(DC_Codeframe_Var,","))
+    DB_CY_Var<-unlist(strsplit(DB_CY_Var,","))
+    DB_PY_Var<-unlist(strsplit(DB_PY_Var,","))
+    
+    
+    s_time<-proc.time()[3]
+    GO_Codeframe<-read.csv(Go_path,stringsAsFactors = F)
+    DB_PY<-read.csv(DBPY,stringsAsFactors = F)
+    DB_CY<-read.csv(DBCY,stringsAsFactors = F)
+    DC_Codeframe<-read.csv(DC_path,stringsAsFactors = F)
+    e_time<-proc.time()[3] # recording the end time
+    total_time<<-paste0("Run time: ", floor((e_time-s_time)/60),"min ",round(((e_time-s_time) %% 60),0),"s")
+    
+    load<-paste0("All the Inputs File loaded Successfully : ", total_time , "
+                 click Ok-To Proceed" )
+    
+    
+    msgBox <- tkmessageBox(title = "",
+                           message = load, icon = "info", type = "ok")
+    
+    
+    DC_Codef1<-DC_Codeframe[,DC_Codeframe_Var]
+    
+    GO_Codeframe[,2]<-toupper(GO_Codeframe[,2])
+    Go_cf<-GO_Codeframe[,Go_var]
+    Go_cf[,paste0("Selection_",Cur_Year)]<-1  #New
+    Go_cf2<-Go_cf
+    
+    Go_cf2$Act_cov<-1
+    
+    ####################Common Block########################
+    s_time<-proc.time()[3]
+    com_block<-merge(Go_cf2[,c(1,2,3)],DC_Codef1,by.x=c(names(Go_cf2)[1]),by.y=c(names(DC_Codef1)[1]),all.x=T)
+    com_block<-com_block[,c(1,3,4)]
+    com_block$Remark<-ifelse((com_block[,2] ==1) & (com_block[,3]==1),"Common Block",ifelse((com_block[,2]==0) & (com_block[,3]==0),"Not in both Year Wave","Rotation Block"))
+    com_blc_all<-com_block[which(com_block$Remark %in% "Common Block"),]
+    
+    e_time<-proc.time()[3] # recording the end time
+    total_time<<-paste0("Run time: ", floor((e_time-s_time)/60),"min ",round(((e_time-s_time) %% 60),0),"s")
+    
+    load<-paste0("Common Block Summary Generated : ", total_time , "
+                 click Ok-To Proceed" )
+    
+    
+    msgBox <- tkmessageBox(title = "",
+                           message = load, icon = "info", type = "ok")
+    
+    #########Part 1#######################
+    s_time<-proc.time()[3]
+    DB_var<-DB_CY_Var[1:4]
+    DB_CY1<-DB_CY[,DB_var]
+    DB_PY1<-DB_PY[,DB_PY_Var]
+    
+    DB_CY1[,3]<-trim(DB_CY1[,3])
+    DB_PY1[,3]<-trim(DB_PY1[,3])
+    
+    DB_CY2<-merge(com_block[,c(1,4)],DB_CY1,by.x=c(names(com_block)[1]),by.y=c(names(DB_CY1)[2]),all.x=T)
+    #DB_CY3<-unique((DB_CY2),by=c(1,3))
+    
+    DB_PY2<-merge(com_block[,c(1,4)],DB_PY1,by.x=c(names(com_block)[1]),by.y=c(names(DB_PY1)[2]),all.x=T)
+    #DB_PY3<-unique((DB_PY2),by=c(1,3))
+    
+    
+    
+    outcount<-function(dfname,year){
+      dt1<-dfname[,c(1,4,3,2)]
+      dt1$index<-row.names(dt1)
+      col<-colnames(dt1)[1:2]
+      db1<-ddply(dt1,col,summarise,count=length(na.omit(RESPONSEID)))
+      db1$RESYear<-year
+      names(db1)[1]<-"BCODE"
+      names(db1)[2]<-"OUTTYPNM"
+      names(db1)[3]<-"Count"
+      return(db1)
+    }
+    
+    CY_outcount<-outcount(DB_CY2,Cur_Year)
+    PY_outcount<-outcount(DB_PY2,Pre_Year)
+    
+    CY_outcount<-merge(CY_outcount,com_block[,c(1,4)],by.x=c("BCODE"),by.y=c(names(com_block)[1]),all.x=T)
+    PY_outcount<-merge(PY_outcount,com_block[,c(1,4)],by.x=c("BCODE"),by.y=c(names(com_block)[1]),all.x=T)
+    
+    Final_outcount<-rbind(CY_outcount,PY_outcount)
+    Final_outcount$Rev_Outtype<-""
+    write.csv(Final_outcount,paste0(outpath,"/Final_Outcount.csv"),row.names=F)
+    
+    e_time<-proc.time()[3] # recording the end time
+    total_time<<-paste0("Run time: ", floor((e_time-s_time)/60),"min ",round(((e_time-s_time) %% 60),0),"s")
+    
+    load<-paste0("Outlet Type File Prepared.Please Check Output Folder and Review String Error : ", total_time , "
+                 click Ok-To Proceed" )
+    
+    
+    msgBox <- tkmessageBox(title = "",
+                           message = load, icon = "info", type = "ok")
+    
+    #dispose(w)
+    
+  }
+  button2<-gbutton("RUN R CODE-PART I",cont=gg,handler=rbc)
+  ###################Part I Processing Completed################################# 
+  
+  
+  ga2 <- gframe("",pos=0.5,horizontal = F, container = g)
+  bb1<-glabel("PART II::Generate CBA & ADD_VAL Report",cont=ga2,anchor=c(05,1),editable = T)
+  
+  gaa <- gframe("SELECT REQUIRED INPUTS",pos=0.5,horizontal = T, container = g)
+  #size(gaa)<-c(650,25)
+  gaa_1 <- gframe("",pos=0.5,horizontal = T, container = g)
+  
+  browse.file6 <- gfilebrowse("Revised Outlettyp.csv",container = gaa,type="open",quote=F)
+  size(browse.file6)<- c(200,20)
+  bf6_6adv<-glabel("",cont=gaa,anchor=c(-1,0),editable=T)
+  size(bf6_6adv)<-c(340,20)
+  
+  browse.file6adv <- gfilebrowse("Mapping.csv",container = gaa,type="open",quote=F)
+  size(browse.file6adv)<-c(200,20)
+  
+  browse.file66adv <- gfilebrowse("Common_Cat_Beverages.csv",container = gaa_1,type="open",quote=F)
+  size(browse.file66adv)<-c(200,20)
+  bf6_666adv<-glabel("",cont=gaa_1,anchor=c(-1,0),editable=T)
+  size(bf6_666adv)<-c(340,20)
+  browse.file666adv <- gfilebrowse("Common_Cat_Cig.csv",container = gaa_1,type="open",quote=F)
+  size(browse.file666adv)<-c(200,20)
+  
+  gcc <- gframe(horizontal = F,pos=0.5, container = g)
+  ggg <- gframe(horizontal = F,pos=0.5, container = g)
+  
+  
+  button3 <- gbutton(text="OK -TO SUBMIT INPUT::PART II", container = gcc,
+                     handler = function(h, ...) {
+                       Go_path<<- svalue(browse.file1)
+                       DC_path<<- svalue(browse.file2)
+                       DBCY<<- svalue(browse.file3)
+                       DBPY<<- svalue(browse.file4)
+                       outpath<<- svalue(browse.file5)
+                       Go_var<<-svalue(b12)
+                       DC_Codeframe_Var<<-svalue(b22)
+                       DB_CY_Var<<-svalue(b32)
+                       DB_PY_Var<<-svalue(b42)
+                       Cur_Year<<-svalue(b52)
+                       Pre_Year<<-svalue(b62)
+                       fout<<- svalue(browse.file6)
+                       BatchNo<<-svalue(b122)
+                       Cname<<-svalue(b1222b)
+                       # Thrshold<<-svalue(browse.file66)
+                       bev_com<<-svalue(browse.file66adv)
+                       cig_com<<-svalue(browse.file666adv)
+                       mapping<<-svalue(browse.file6adv)
+                       #endPNO<<-svalue(b10)
+                       #CAT_sel<<-svalue(b12)
+                     })
+  
+  ####################Framing for Part II Completed#############################
+  rbc2<-function(h,...){
+    
+    trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+    
+    
+    Go_var<-unlist(strsplit(Go_var,","))
+    DC_Codeframe_Var<-unlist(strsplit(DC_Codeframe_Var,","))
+    DB_CY_Var<-unlist(strsplit(DB_CY_Var,","))
+    DB_PY_Var<-unlist(strsplit(DB_PY_Var,","))
+    
+    
+    s_time<-proc.time()[3]
+    GO_Codeframe<-read.csv(Go_path,stringsAsFactors = F)
+    DB_PY<-read.csv(DBPY,stringsAsFactors = F)
+    DB_CY<-read.csv(DBCY,stringsAsFactors = F)
+    DC_Codeframe<-read.csv(DC_path,stringsAsFactors = F)
+    Thresholds<-read.csv(Thrshold,stringsAsFactors = F)
+    Update_Foutcount<<-read.csv(fout,stringsAsFactors = F)
+    e_time<-proc.time()[3] # recording the end time
+    total_time<<-paste0("Run time: ", floor((e_time-s_time)/60),"min ",round(((e_time-s_time) %% 60),0),"s")
+    
+    load<-paste0("Input File loaded Successfully : ", total_time , "
+                 click Ok-To Proceed" )
+    
+    
+    msgBox <- tkmessageBox(title = "",
+                           message = load, icon = "info", type = "ok")
+    
+    
+    DC_Codef1<-DC_Codeframe[,DC_Codeframe_Var]
+    
+    GO_Codeframe[,2]<-toupper(GO_Codeframe[,2])
+    Go_cf<-GO_Codeframe[,Go_var]
+    Go_cf[,paste0("Selection_",Cur_Year)]<-1  #New
+    Go_cf2<-Go_cf
+    
+    Go_cf2$Act_cov<-1
+    ####################Common Block########################
+    com_block<-merge(Go_cf2[,c(1,2,3)],DC_Codef1,by.x=c(names(Go_cf2)[1]),by.y=c(names(DC_Codef1)[1]),all.x=T)
+    com_block<-com_block[,c(1,3,4)]
+    com_block$Remark<-ifelse((com_block[,2] ==1) & (com_block[,3]==1),"Common Block",ifelse((com_block[,2]==0) & (com_block[,3]==0),"Not in both Year Wave","Rotation Block"))
+    com_blc_all<-com_block[which(com_block$Remark %in% "Common Block"),]
+    
+    #########Part 1#######################
+    DB_var<-DB_CY_Var[1:4]
+    DB_CY1<-DB_CY[,DB_var]
+    DB_PY1<-DB_PY[,DB_PY_Var]
+    
+    DB_CY1[,3]<-trim(DB_CY1[,3])
+    DB_PY1[,3]<-trim(DB_PY1[,3])
+    
+    DB_CY2<-merge(com_blc_all[,c(1,4)],DB_CY1,by.x=c(names(com_blc_all)[1]),by.y=c(names(DB_CY1)[2]))
+    #DB_CY3<-unique((DB_CY2),by=c(1,3))
+    
+    DB_PY2<-merge(com_blc_all[,c(1,4)],DB_PY1,by.x=c(names(com_blc_all)[1]),by.y=c(names(DB_PY1)[2]))
+    #DB_PY3<-unique((DB_PY2),by=c(1,3))
+    
+    
+    outcount<-function(dfname,year){
+      dt1<-dfname[,c(1,4,3,2)]
+      dt1$index<-row.names(dt1)
+      col<-colnames(dt1)[1:2]
+      db1<-ddply(dt1,col,summarise,count=length(index))
+      db1$RESYear<-year
+      names(db1)[1]<-"BCODE"
+      names(db1)[2]<-"OUTTYPNM"
+      names(db1)[3]<-"Count"
+      return(db1)
+    }
+    
+    CY_outcount<-outcount(DB_CY2,Cur_Year)
+    PY_outcount<-outcount(DB_PY2,Pre_Year)
+    
+    Final_outcount<-rbind(CY_outcount,PY_outcount)
+    
+    #Update_Foutcount1<-ddply(Update_Foutcount,c("RESYear","BCODE","OUTTYPNM"),summarise,total=sum(Count,na.rm=T))
+    
+    s_time<-proc.time()[3]
+    Update_F<-merge(Update_Foutcount,Thresholds[,c(1,2,6)],by.x="Rev_Outtype",by.y=(names(Thresholds)[1]),all.x=T)
+    
+    ############Complete Block List
+    Total_count<-aggregate(Count~RESYear+BCODE,FUN=sum,data=Update_F,na.action = na.omit)
+    names(Total_count)<-c("RESYear","BCODE","Total_Count")
+    
+    RMS_all<-Update_F[which(Update_F[,7] %in% "Y" | Update_F[,7] %in% "y"),]
+    RMS_Tot_count<-aggregate(Count~RESYear+BCODE,FUN=sum,data=RMS_all,na.action = na.omit)
+    names(RMS_Tot_count)<-c("RESYear","BCODE","RMS_Count")
+    
+    
+    Common_all<-Update_F[which(Update_F[,8] %in% "Y" | Update_F[,8] %in% "y"),]
+    common_Tot_count<-aggregate(Count~RESYear+BCODE,FUN=sum,data=Common_all,na.action = na.omit)
+    names(common_Tot_count)<-c("RESYear","BCODE","Common_type_Count")
+    
+    
+    sheet1<-merge.all(by = c("RESYear","BCODE"),Total_count,RMS_Tot_count,common_Tot_count)
+    rm(Total_count)
+    rm(RMS_Tot_count)
+    rm(common_Tot_count)
+    rm(DC_Codeframe)
+    rm(Go_cf2)
+    rm(Go_cf)
+    rm(GO_Codeframe)
+    #######################Complete Block #####################################
+    complt1<-reshape(sheet1,idvar = "BCODE",timevar="RESYear",direction="wide")
+    
+    complete<-merge(complt1,com_block[,c(1,4)],by="BCODE",all.x=T)
+    complete1<-merge(complete,DC_Codef1[,c(1,3,4)],by="BCODE",all.x=T)
+    complete1$Batch<-BatchNo
+    
+    complete1<-complete1[,c(11,10,9,1,8,2:7)]
+    complete1[,c(6:11)][(is.na(complete1[,c(6:11)]))]<-0
+    names(complete1)<-gsub("Total_Count","Store_Count",names(complete1))
+    
+    complete1$Overall_Diff<-(complete1[,paste0("Store_Count.",Cur_Year)]) - (complete1[,paste0("Store_Count.",Pre_Year)])
+    complete1$Overall_Growth<-round(((complete1$Overall_Diff)/complete1[,paste0("Store_Count.",Pre_Year)])*100,0)
+    
+    complete1$RMS_Diff<-(complete1[,paste0("RMS_Count.",Cur_Year)]-complete1[,paste0("RMS_Count.",Pre_Year)])
+    complete1$RMS_Growth<-round(((complete1$RMS_Diff)/complete1[,paste0("RMS_Count.",Pre_Year)])*100,0)
+    
+    complete1$Common_Diff<-(complete1[,paste0("Common_type_Count.",Cur_Year)]-complete1[,paste0("Common_type_Count.",Pre_Year)])
+    complete1$Common_Growth<-round(((complete1$Common_Diff)/complete1[,paste0("Common_type_Count.",Pre_Year)])*100,0)
+    
+    rm(complt1)
+    rm(complete)
+    e_time<-proc.time()[3] # recording the end time
+    total_time<<-paste0("Run time: ", floor((e_time-s_time)/60),"min ",round(((e_time-s_time) %% 60),0),"s")
+    
+    load<-paste0("Complete Block List Generated : ", total_time , "
+                 click Ok-To Proceed" )
+    
+    
+    msgBox <- tkmessageBox(title = "",
+                           message = load, icon = "info", type = "ok")
+    
+    ##################################################################################
+    ####Outlet Summary
+    s_time<-proc.time()[3]
+    Outsumry<-Thresholds[,c(5,1,7,8,6,2)]
+    names(Outsumry)[3]<-paste0("Outlettype_Covered_",Cur_Year)
+    names(Outsumry)[4]<-paste0("Outlettype_Covered_",Pre_Year)
+    e_time<-proc.time()[3] # recording the end time
+    total_time<<-paste0("Run time: ", floor((e_time-s_time)/60),"min ",round(((e_time-s_time) %% 60),0),"s")
+    
+    load<-paste0("Outlet Summary Generated : ", total_time , "
+                 click Ok-To Proceed" )
+    
+    
+    msgBox <- tkmessageBox(title = "",
+                           message = load, icon = "info", type = "ok")
+    
+    ####################################################################
+    
+    ###############################Block * Outype Summary
+    s_time<-proc.time()[3]
+    
+    Update_f_c<-Update_F[which(Update_F$Remark %in% "Common Block"),]
+    
+    Common_all_c<-Update_f_c[which(Update_f_c[,8] %in% "Y" | Update_f_c[,8] %in% "y"),]
+    common_Tot_countc<-aggregate(Count~RESYear+BCODE+Rev_Outtype,FUN=sum,data=Common_all_c,na.action = na.omit)
+    names(common_Tot_countc)<-c("RESYear","BCODE","OUTLETTYPE","Store_Count")
+    
+    complt_sum<-reshape(common_Tot_countc,idvar=c("BCODE","OUTLETTYPE"),timevar="RESYear",direction="wide")
+    
+    
+    block_summary<-merge(complt_sum,Thresholds[,c(5,1,2,6)],by.x="OUTLETTYPE",by.y="OUTTYPNM",all.x=T)
+    block_sum_com<-merge(block_summary,DC_Codef1[,c(1,3,4)],by="BCODE",all.x=T)
+    block_sum_com$Batch<-BatchNo
+    block_sum_com<-block_sum_com[,c(10,9,8,1,5,2,6,7,3,4)]
+    
+    rm(complt_sum)
+    rm(block_summary)
+    
+    block_sum_com[,9][is.na(block_sum_com[,c(9)])]<-0
+    block_sum_com[,10][is.na(block_sum_com[,c(10)])]<-0
+    
+    #names(block_sum_com)<-gsub("Total_Count.","Store_Count_",names(block_sum_com))
+    
+    block_sum_com$Diff<-((block_sum_com[,paste0("Store_Count.",Cur_Year)])-(block_sum_com[,paste0("Store_Count.",Pre_Year)]))
+    
+    block_sum_com2<-merge(block_sum_com,Thresholds[,c(1,3,4)],by.x=c("OUTLETTYPE"),by.y=c(names(Thresholds)[1]),all.x=T)
+    
+    rm(block_sum_com)
+    
+    block_sum_com2$Growth1<-(block_sum_com2$Diff/block_sum_com2[,paste0("Store_Count.",Pre_Year)])*100
+    
+    
+    block_sum_com2$Growth<-ifelse((block_sum_com2[,paste0("Store_Count.",Pre_Year)])==0
+                                  ,(block_sum_com2$Diff)*100,(block_sum_com2$Growth1))
+    
+    
+    
+    block_sum_com2$Problematic_Flag<-ifelse(((abs(block_sum_com2$Diff)) >= (block_sum_com2$Difference.Criteria) & (abs(block_sum_com2$Growth)) > (block_sum_com2$Growth.Ctiteria)),1,0)
+    
+    block_sum_com2$DC_Comments<-ifelse((block_sum_com2$Problematic_Flag==1) & (block_sum_com2$Growth < 0),(paste0("Please Provide the reasons for store count decrease by ",abs(block_sum_com2$Diff),sep=" ")),
+                                       ifelse((block_sum_com2$Problematic_Flag==1) & (block_sum_com2$Growth > 0), ( paste0("Please Provide the reasons for store count increase by ",abs(block_sum_com2$Diff),sep=" ")),"" ))                      
+    
+    block_sum_com2$Growth<-round(block_sum_com2$Growth,0)
+    
+    blocklevel3<-block_sum_com2[,c(2:4,1,5:11,15:17)]
+    
+    rm(block_sum_com2)
+    
+    e_time<-proc.time()[3] # recording the end time
+    total_time<<-paste0("Run time: ", floor((e_time-s_time)/60),"min ",round(((e_time-s_time) %% 60),0),"s")
+    
+    load<-paste0("Block Level Summary Prepared: ", total_time , "
+                 click Ok-To Proceed")
+    
+    
+    msgBox <- tkmessageBox(title = "",
+                           message = load, icon = "info", type = "ok")
+    
+    ###################################Exporting Output###############
+    s_time<-proc.time()[3]
+    writeWorksheetToFile(paste0(outpath,"\\",Cname,"_",BatchNo,"_CBA.xlsx"), data=list(a=Outsumry,b=complete1,c=blocklevel3), sheet=c("Outlet Summary","Completed Block List","Block Level"), header=T)
+    e_time<-proc.time()[3] # recording the end time
+    total_time<<-paste0("Run time: ", floor((e_time-s_time)/60),"min ",round(((e_time-s_time) %% 60),0),"s")
+    
+    load<-paste0("CBA COmpleted: ", total_time , "
+                 click Ok-To Proceed")
+    msgBox <- tkmessageBox(title = "",
+                           message = load, icon = "info", type = "ok")
+    
+    ################################Additional Validation Start###################
+    
+    s_time<-proc.time()[3]
+    
+    Datatmp11<-lapply(DBCY,function(x){read.csv(x,stringsAsFactors = F)})
+    CYDB1<-Datatmp11
+    
+    PYDB1<-lapply(DBPY,function(x){read.csv(x,stringsAsFactors = F)})
+    
+    Com1<-read_csv(bev_com,col_names=T)
+    Com2<-read_csv(cig_com,col_names=T)
+    
+    Brandmap<-read_csv(mapping,col_names=T)
+    
+    
+    e_time<-proc.time()[3] # recording the end time
+    total_time<<-paste0("Run time: ", floor((e_time-s_time)/60),"min ",round(((e_time-s_time) %% 60),0),"s")
+    
+    load<-paste0("Additional Validation Input File loaded Successfully : ", total_time , "
+                 click Ok-To Proceed" )
+    
+    
+    msgBox <- tkmessageBox(title = "",
+                           message = load, icon = "info", type = "ok")
+    
+    
+    #com_blk<-as.character(unique(blocklevel3[,5]))
+    com_blk<-unique(unlist(blocklevel3[,5]))
+    com_out<-unique(unlist(Update_Foutcount[,6]))
+    
+    GO_Codeframe<-read.csv(Go_path,stringsAsFactors = F)
+    lstblk<-as.data.frame(GO_Codeframe[,1])
+names(lstblk)[1]<-"BLOCK_CODE"
+    rm(GO_Codeframe)
+    
+    
+    brmap<-names(Brandmap)[1]
+    brndmap<-names(Brandmap)[2]
+    
+    
+    #Keep records only for Info collected as 1 and Current Blocks of block
+    #Datatmp11[[1]]<-Datatmp11[[1]][which(Datatmp11[[1]][,DB_CY_Var[4]] %in% 1),]
+    Datatmp11[[1]]<-merge(Datatmp11[[1]],lstblk,by.x=c(DB_CY_Var[2]),by.y="BLOCK_CODE",all.y=T)
+    Datatmp11[[1]]<-Datatmp11[[1]][which(Datatmp11[[1]][,DB_CY_Var[4]] %in% 1),]
+    
+    Baskt_list<-split(Brandmap,Brandmap[,3])
+    
+    
+    s_time<-proc.time()[3]
+    #Looping for creating basket specific Databases
+    for (i in 1:length(Baskt_list)){
+      
+      #Baskt_list[[i]]<-Datatmp11[[1]][names(Datatmp11[[1]]) %in% c("RESPONSEID",unlist(Baskt_list[[i]][,1]))]}
+      Baskt_list[[i]]<-Datatmp11[[1]][which(colnames(Datatmp11[[1]]) %in% c("RESPONSEID",unlist(Baskt_list[[i]][,1])))]
+      Baskt_list[[i]]<-reshape(Baskt_list[[i]],idvar =c("RESPONSEID"),varying = c(2:ncol(Baskt_list[[i]])),
+                               v.names = "Presence",direction = "long",times=names(Baskt_list[[i]])[2:ncol(Baskt_list[[i]])])
+      
+      Baskt_list[[i]]<-merge(Baskt_list[[i]],Brandmap[,c(1:2)],by.x="time",by.y=brmap,all.x=T)
+      
+      Baskt_list[[i]]<-reshape(Baskt_list[[i]][,c(2:ncol(Baskt_list[[i]]))],v.names="Presence",
+                               idvar = "RESPONSEID",timevar=brndmap,direction="wide")
+      names(Baskt_list[[i]])[2:ncol(Baskt_list[[i]])]<-gsub("Presence.","",names(Baskt_list[[i]])[2:ncol(Baskt_list[[i]])])
+      
+      #Baskt_list[[i]][[paste0(names(Baskt_list)[i],"_sum")]]<-rowSums(Baskt_list[[i]][,2:ncol(Baskt_list[[i]])])
+      
+      #Baskt_list[[i]][[paste0(names(Baskt_list)[i],"_sum")]]<-apply(Baskt_list[[i]][,2:ncol(Baskt_list[[i]])],1,sum,na.rm=T)
+      
+      #Baskt_list[[i]][[paste0(names(Baskt_list)[i],"_sum")]]<-rowSums(Baskt_list[[i]][,2:ncol(Baskt_list[[i]])])
+      #Number of categories handling
+      Baskt_list[[i]][[paste0(names(Baskt_list)[i],"_sum")]]<-if(length(Baskt_list[[i]]) %in% 2) {Baskt_list[[i]][,2]} else {rowSums(Baskt_list[[i]][,2:ncol(Baskt_list[[i]])])}
+      
+    }
+    #Dummy list to fetch last column and add 1 to add Basket Handler column in coming steps
+    abc<-list()
+    for (i in 1:length(Baskt_list)){
+      lc<-ncol(Baskt_list[[i]])+1
+      abc<-c(abc,lc)
+    }
+    
+    
+    #Concatenation based on category presence
+    for (i in 1:length(Baskt_list)){
+      
+      for(j in 2:(ncol(Baskt_list[[i]])-1)){
+        Baskt_list[[i]][,paste0("f",j,sep="")]<-ifelse((Baskt_list[[i]][,j]==1),names(Baskt_list[[i]])[j],NA)
+      }
+    }
+    
+    
+    for(i in 1:length(Baskt_list)){
+      
+      Baskt_list[[i]][[paste0(names(Baskt_list)[i],"_Cathan")]]<-if(length(Baskt_list[[i]]) %in% 4) {Baskt_list[[i]][,4]} else {apply(Baskt_list[[i]][,c(abc[[i]]:ncol(Baskt_list[[i]]))],1, paste,collapse=" ;")} 
+      
+      Baskt_list[[i]]<-Baskt_list[[i]][,-c(abc[[i]]:(ncol(Baskt_list[[i]])-1))]
+      
+      Baskt_list[[i]][[ncol(Baskt_list[[i]])]]<-gsub("NA ;|; NA|NA|;NA","",Baskt_list[[i]][[ncol(Baskt_list[[i]])]])
+    }
+    
+    #Merge all dataframe,basket wise 
+    Master<-Reduce(merge,Baskt_list)
+    Mast1<-Master[,grep("RESPONSEID|_sum|_Cathan",colnames(Master))]
+    Mast2<-Master[,-grep("_sum|_Cathan",colnames(Master))]
+    
+    Fin1<-merge(Mast2,Mast1,by=c("RESPONSEID"),all=T)
+    Fin2<-merge(Fin1,CYDB1[[1]][,c(DB_CY_Var[1],DB_CY_Var[5],DB_CY_Var[6],DB_CY_Var[3],DB_CY_Var[4])],by="RESPONSEID",all.x=T)
+    a<-names(Fin2[,grep("_sum",names(Fin2))])
+    b<-names(Fin2[,grep("_Cathan",names(Fin2))])
+    
+    Fin3<-Fin2[,c(DB_CY_Var[1],DB_CY_Var[3],DB_CY_Var[4],a,b,DB_CY_Var[6],DB_CY_Var[5])]
+    Fin3$Problematic_Flag<-""
+    names(Fin3)<-gsub("_sum","-No of Categories Handling",names(Fin3))
+    names(Fin3)<-gsub("_Cathan","-list of Categories Handling",names(Fin3))
+    
+    e_time<-proc.time()[3] # recording the end time
+    total_time<<-paste0("Run time: ", floor((e_time-s_time)/60),"min ",round(((e_time-s_time) %% 60),0),"s")
+    
+    load<-paste0("Outlet Wise Summary Prepared : ", total_time , "
+                 click Ok-To Proceed" )
+    
+    
+    msgBox <- tkmessageBox(title = "",
+                           message = load, icon = "info", type = "ok")
+    
+    
+    ######################################Sheet1 Prepared#######################  
+    s_time<-proc.time()[3]
+    
+    
+    CYDB1[[1]]<-CYDB1[[1]][which(CYDB1[[1]][[DB_CY_Var[2]]] %in% com_blk),]
+    PYDB1[[1]]<-PYDB1[[1]][which(PYDB1[[1]][[DB_PY_Var[2]]] %in% com_blk),]
+    
+    
+    
+    #vec_n_b<-Com1[,1][!is.na(Com1[,1])]
+    vec_n_b<-na.omit(Com1[,1])
+    
+    #vec_o_b<-Com1[,2][!is.na(Com1[,2])]
+    vec_o_b<-na.omit(Com1[,2])
+    
+    #vec_n_c<-Com2[,1][!is.na(Com2[,1])]
+    vec_n_c<-na.omit(Com2[,1])
+    
+    #vec_o_c<-Com2[,2][!is.na(Com2[,2])]
+    vec_o_c<-na.omit(Com2[,2])
+    
+    cy1b<-c(DB_var,unlist(vec_n_b))
+    py1b<-c(DB_PY_Var,unlist(vec_o_b))
+    cy2c<-c(DB_var,unlist(vec_n_c))
+    py2c<-c(DB_PY_Var,unlist(vec_o_c))
+    
+    
+    Cur_bev_Han<-CYDB1[[1]][,cy1b]
+    
+    Cur_tob_Han<-CYDB1[[1]][,cy2c]
+    
+    Pre_bev_Han<-PYDB1[[1]][,py1b]
+    Pre_tob_Han<-PYDB1[[1]][,py2c]
+    
+    aa1<-list(Bev_Han_Cur=Cur_bev_Han,Tob_Han_Cur=Cur_tob_Han)
+    aa2<-list(Bev_Han_Pre=Pre_bev_Han,Tob_Han_Pre=Pre_tob_Han)
+    
+    rm(Cur_tob_Han)
+    rm(Cur_bev_Han)
+    rm(Pre_tob_Han)
+    rm(Pre_bev_Han)
+    
+    for (i in 1:length(aa1)){
+      aa1[[i]][,5:ncol(aa1[[i]])]<-ifelse(aa1[[i]][,5:ncol(aa1[[i]])]==1,1,0)
+      aa1[[i]][[names(aa1[i])]]<-if(length(aa1[[i]]) %in% 5) {aa1[[i]][,5]} else {rowSums(aa1[[i]][,5:ncol(aa1[[i]])])}
+      #lcol[i]<-names(aa1[[i]])[ncol(aa1[[i]])]
+      aa1[[i]][names(aa1[[i]])[ncol(aa1[[i]])]]<-ifelse(aa1[[i]][names(aa1[[i]])[ncol(aa1[[i]])]]==0,0,1)
+      aa1[[i]]<-aa1[[i]][,c(1:4,ncol(aa1[[i]]))]
+      aa1[[i]]$Year<-Cur_Year
+    }
+    
+    
+    Mast_a<-Reduce(merge,aa1)
+    
+    for (i in 1:length(aa2)){
+      aa2[[i]][,5:ncol(aa2[[i]])]<-ifelse(aa2[[i]][,5:ncol(aa2[[i]])]==1,1,0)
+      aa2[[i]][[names(aa2[i])]]<-if(length(aa2[[i]]) %in% 5) {aa2[[i]][,5]} else {rowSums(aa2[[i]][,5:ncol(aa2[[i]])])}
+      #lcol[i]<-names(aa2[[i]])[ncol(aa2[[i]])]
+      aa2[[i]][names(aa2[[i]])[ncol(aa2[[i]])]]<-ifelse(aa2[[i]][names(aa2[[i]])[ncol(aa2[[i]])]]==0,0,1)
+      aa2[[i]]<-aa2[[i]][,c(1:4,ncol(aa2[[i]]))]
+      aa2[[i]]$Year<-Pre_Year
+    }
+    
+    
+    Mast_b<-Reduce(merge,aa2)
+    
+    names(Mast_b)<-names(Mast_a)
+    Master2<-rbind(Mast_a,Mast_b)
+    
+    outcomm<-unique(Update_Foutcount[,c(2,6)],by=c("OUTTYPNM","Rev_Outtype"))
+    
+    
+    Mastr1<-merge(Master2,outcomm,by.x=(names(Master2)[3]),by.y=(names(outcomm)[1]),all.x=T)
+    Mastr2<-merge(Mastr1,Thresholds[,c(1,6)],by.x=(names(Mastr1)[8]),by.y=(names(Thresholds)[1]),all.x=T)
+    
+    common<-merge(com_blk,com_out)
+    names(common)<-c("BLOCK_CODE","OUTTYPENM")
+    
+    Mastr<-Mastr2[which(Mastr2[,9] =="Y"| Mastr2[,9]=="y"),]
+    
+    total_count=aggregate(RESPONSEID~BLOCK_CODE+Rev_Outtype+Year,FUN=length, data=Mastr,na.action = na.omit)
+    names(total_count)<-c("BLOCK_CODE","OUTTYPENM","Year","Total_Count")
+    info<-Mastr[which(Mastr$INFO_COLL1==1),]
+    info_1=aggregate(RESPONSEID~BLOCK_CODE+Rev_Outtype+Year,FUN=length, data=info,na.action = na.omit)
+    names(info_1)<-c("BLOCK_CODE","OUTTYPENM","Year","Count(info_1)")
+    
+    Bev<-Mastr[which(Mastr$Bev_Han_Cur==1),]
+    Bev_han=aggregate(RESPONSEID~BLOCK_CODE+Rev_Outtype+Year,FUN=length, data=Bev,na.action = na.omit)
+    names(Bev_han)<-c("BLOCK_CODE","OUTTYPENM","Year","Count_Bev")
+    
+    Tob<-Mastr[which(Mastr$Tob_Han_Cur==1),]
+    Tob_han=aggregate(RESPONSEID~BLOCK_CODE+Rev_Outtype+Year,FUN=length, data=Tob,na.action = na.omit)
+    names(Tob_han)<-c("BLOCK_CODE","OUTTYPENM","Year","Count_Tob")
+    
+    
+    #function for merging multiple files
+    merge.all <- function(by, ...) {
+      frames <- list(...)
+      return (Reduce(function(x, y) {merge(x, y, by = by, all = TRUE)}, frames))
+    }  # end merge.all
+    ####################################################################################################
+    Bev1=merge.all(by = c("BLOCK_CODE","OUTTYPENM","Year"), total_count, info_1,Bev_han)
+    Tob1=merge.all(by = c("BLOCK_CODE","OUTTYPENM","Year"), total_count, info_1,Tob_han)
+    
+    Bev_wide<-reshape(Bev1,idvar =c("BLOCK_CODE","OUTTYPENM"),timevar="Year",direction="wide")
+    Bev_wide[,c(3:8)][(is.na(Bev_wide[,c(3:8)]))]<-0
+    
+    Tob_wide<-reshape(Tob1,idvar =c("BLOCK_CODE","OUTTYPENM"),timevar="Year",direction="wide")
+    Tob_wide[,c(3:8)][(is.na(Tob_wide[,c(3:8)]))]<-0
+    
+    Common_bev<-merge(common,Bev_wide,by=c("BLOCK_CODE","OUTTYPENM"),all.x=T)
+    Common_bev[,c(3:8)][(is.na(Common_bev[,c(3:8)]))]<-0
+    Common_bev$Tot_Count_diff<-((Common_bev[,paste0("Total_Count.",Cur_Year)])-(Common_bev[,paste0("Total_Count.",Pre_Year)]))
+    Common_bev$Tot_Count_grt<-((Common_bev$Tot_Count_diff)/(Common_bev[,paste0("Total_Count.",Pre_Year)]))*100
+    Common_bev$Tot_Growth<-ifelse((Common_bev[,paste0("Total_Count.",Pre_Year)])==0
+                                  ,(Common_bev$Tot_Count_diff)*100,(Common_bev$Tot_Count_grt))
+    
+    Common_bev$Tot_Growth<-round(Common_bev$Tot_Growth,0)
+    
+    Common_bev$Tot_Count_grt<-NULL
+    
+    Common_bev$Bev_diff<-((Common_bev[,paste0("Count_Bev.",Cur_Year)])-(Common_bev[,paste0("Count_Bev.",Pre_Year)]))
+    Common_bev$Bev_grt<-((Common_bev$Bev_diff)/(Common_bev[,paste0("Count_Bev.",Pre_Year)]))*100
+    
+    Common_bev$Bev_Growth<-ifelse((Common_bev[,paste0("Count_Bev.",Pre_Year)])==0
+                                  ,(Common_bev$Bev_diff)*100,(Common_bev$Bev_grt))
+    
+    
+    Common_bev$Bev_Growth<-round(Common_bev$Bev_Growth,0)
+    Common_bev$Bev_grt<-NULL
+    
+    
+    Common_tob<-merge(common,Tob_wide,by=c("BLOCK_CODE","OUTTYPENM"),all.x=T)
+    Common_tob[,c(3:8)][(is.na(Common_tob[,c(3:8)]))]<-0
+    Common_tob$Tot_Count_diff<-((Common_tob[,paste0("Total_Count.",Cur_Year)])-(Common_tob[,paste0("Total_Count.",Pre_Year)]))
+    Common_tob$Tot_Count_grt<-((Common_tob$Tot_Count_diff)/(Common_tob[,paste0("Total_Count.",Pre_Year)]))*100
+    Common_tob$Tot_Growth<-ifelse((Common_tob[,paste0("Total_Count.",Pre_Year)])==0
+                                  ,(Common_tob$Tot_Count_diff)*100,(Common_tob$Tot_Count_grt))
+    
+    
+    Common_tob$Tot_Growth<-round(Common_tob$Tot_Growth,0)
+    Common_tob$Tot_Count_grt<-NULL
+    
+    Common_tob$tob_diff<-((Common_tob[,paste0("Count_Tob.",Cur_Year)])-(Common_tob[,paste0("Count_Tob.",Pre_Year)]))
+    Common_tob$tob_grt<-((Common_tob$tob_diff)/(Common_tob[,paste0("Count_Tob.",Pre_Year)]))*100
+    
+    Common_tob$tob_Growth<-ifelse((Common_tob[,paste0("Count_Tob.",Pre_Year)])==0
+                                  ,(Common_tob$tob_diff)*100,(Common_tob$tob_grt))
+    
+    
+    Common_tob$tob_Growth<-round(Common_tob$tob_Growth,0)
+    Common_tob$tob_grt<-NULL
+    
+    e_time<-proc.time()[3] # recording the end time
+    total_time<<-paste0("Run time: ", floor((e_time-s_time)/60),"min ",round(((e_time-s_time) %% 60),0),"s")
+    
+    load<-paste0("Beverage & Tobacco Summary Prepared : ", total_time , "
+                 click Ok-To Proceed" )
+    
+    
+    msgBox <- tkmessageBox(title = "",
+                           message = load, icon = "info", type = "ok")
+    
+    
+    
+    
+    #writeWorksheetToFile (paste0(outpath,"\\Additional_Val.xlsx"), data=list(a=Fin3,b=Common_bev,c=Common_tob), sheet=c("Other Shoptype Check","Bev Handling Validation","Tob Handling Validations"), header=T)
+    s_time<-proc.time()[3]
+   #writeWorksheetToFile(paste0(outpath,"\\",Cname,"_",BatchNo,"_Additional_Val.xlsx"), data=list(a=Fin3,b=Common_bev,c=Common_tob), sheet=c("Other Shoptype Check","Bev Handling Validation","Tob Handling Validations"), header=T)
+    write.csv(Fin3,paste0(outpath,"\\",Cname,"_",BatchNo,"_Other Shoptype Check.csv"))
+    write.csv(Common_bev,paste0(outpath,"\\",Cname,"_",BatchNo,"_Bev Handling Validations.csv"))
+    write.csv(Common_tob,paste0(outpath,"\\",Cname,"_",BatchNo,"_Tob Handling Validations.csv"))
+    
+    e_time<-proc.time()[3] # recording the end time
+    total_time<<-paste0("Run time: ", floor((e_time-s_time)/60),"min ",round(((e_time-s_time) %% 60),0),"s")
+    
+    load<-paste0("Additional Validation Completed : ", total_time , "
+                 click Ok-To Proceed" )
+    
+    
+    msgBox <- tkmessageBox(title = "",
+                           message = load, icon = "info", type = "ok")
+    
+    
+    
+    
+    
+    
+    dispose(w)
+  }
+  
+  
+  button4<-gbutton("RUN R CODE-PART II",cont=ggg,handler=rbc2)
+}
+createKsTestGwidgets()
+
+#############################CBA COmpleted#########################################
+
